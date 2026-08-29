@@ -1,0 +1,10 @@
+{
+  "name": "Blindfold Chess Trainer V2",
+  "short_name": "Blindfold Chess",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#111827",
+  "icons": [],
+  "orientation": "portrait"
+}

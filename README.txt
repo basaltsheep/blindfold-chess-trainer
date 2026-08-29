@@ -1,0 +1,1 @@
+Version 2 updated with an in-app streak widget, weekly completion dots, today's status, milestone progress, and local date history. Host on HTTPS, open in Safari, then Share > Add to Home Screen.

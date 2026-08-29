@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827"><link rel="manifest" href="manifest.json">
+<title>Blindfold Chess Trainer v2</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--text:#111827;--muted:#6b7280;--accent:#111827;--soft:#eef2ff;--line:#e5e7eb;--good:#dcfce7;--bad:#fee2e2;--gold:#f59e0b}
+@media(prefers-color-scheme:dark){:root{--bg:#0b1020;--card:#151b2e;--text:#f3f4f6;--muted:#9ca3af;--accent:#f3f4f6;--soft:#202946;--line:#293149;--good:#12351f;--bad:#431b20;--gold:#fbbf24}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.app{max-width:760px;margin:auto;padding:18px 15px 45px}
+.top{display:flex;justify-content:space-between;align-items:center}.logo{font-size:32px}.title{font-size:25px;font-weight:850;margin:0}.sub{margin:3px 0 18px;color:var(--muted)}
+.card{background:var(--card);border-radius:20px;padding:18px;margin:12px 0;box-shadow:0 5px 25px #0000000b}.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+button{border:0;border-radius:13px;padding:13px 16px;font-size:16px;font-weight:750;background:var(--accent);color:var(--bg);min-height:48px;cursor:pointer}button.secondary{background:#e5e7eb;color:#111827}@media(prefers-color-scheme:dark){button.secondary{background:#252c42;color:#f3f4f6}}
+button:disabled{opacity:.7}.pill{background:#e5e7eb;color:#374151;padding:6px 10px;border-radius:99px;font-size:13px;font-weight:650}.muted{color:var(--muted)}h2{margin:5px 0 10px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}.stat{background:#f9fafb;border-radius:14px;padding:10px;text-align:center}@media(prefers-color-scheme:dark){.stat{background:#10162a}}.num{font-size:21px;font-weight:850}
+.progress{height:9px;background:#e5e7eb;border-radius:9px;overflow:hidden;margin-top:14px}.bar{height:100%;background:#111827;width:0;transition:.25s}@media(prefers-color-scheme:dark){.bar{background:#f3f4f6}}
+.streakWidget{margin:14px 0 2px;padding:15px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(135deg,var(--soft),transparent);cursor:pointer}.streakHead{display:flex;justify-content:space-between;align-items:center;gap:10px}.streakNumber{font-size:30px;font-weight:900}.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:12px}.day{text-align:center;font-size:11px;color:var(--muted)}.dot{height:31px;width:31px;max-width:100%;margin:4px auto 0;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;background:#e5e7eb;color:#6b7280}.dot.done{background:var(--good);color:#15803d}.dot.today{outline:2px solid var(--gold);outline-offset:2px}.streakProgress{height:8px;background:#e5e7eb;border-radius:8px;overflow:hidden;margin-top:10px}.streakProgress>div{height:100%;background:var(--gold);width:0}.milestone{font-size:13px;color:var(--muted);margin-top:7px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.mode{padding:15px;border:1px solid var(--line);border-radius:15px;background:transparent;color:var(--text);text-align:left}.mode b{display:block;font-size:17px;margin-bottom:4px}.mode span{color:var(--muted);font-size:14px}.big{font-size:48px;font-weight:900;text-align:center;margin:18px 0}.center{text-align:center}.choices{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:18px}.choices button{background:var(--soft);color:var(--text)}.choices button.correct{background:var(--good)}.choices button.wrong{background:var(--bad)}
+.board{width:min(94vw,430px);aspect-ratio:1;margin:17px auto;display:grid;grid-template-columns:repeat(8,1fr);border-radius:12px;overflow:hidden;box-shadow:0 5px 20px #0003}.sq{display:grid;place-items:center;font-size:clamp(24px,8vw,43px)}.light{background:#f0d9b5}.dark{background:#b58863}
+.hidden{display:none}.tip{padding:12px;border-radius:13px;background:var(--soft);margin-top:12px}.moves{font-size:18px;line-height:1.8;background:var(--soft);padding:12px;border-radius:12px;word-break:break-word}.danger{color:#b91c1c}.success{color:#15803d}.level{font-size:15px;color:var(--gold);font-weight:800}.input{width:100%;font-size:18px;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text)}
+</style></head>
+<body><main class="app">
+<div class="top"><div><div class="logo">♟️</div><h1 class="title">Blindfold Chess</h1><p class="sub">Version 2 · Build the board in your head.</p></div><button class="secondary" onclick="resetAll()">Reset</button></div>
+
+<section id="home" class="card">
+<div class="row"><span class="pill">Daily training</span><span class="level" id="levelLabel">Level 1</span></div>
+<div class="progress"><div id="homeBar" class="bar"></div></div>
+<div class="stats"><div class="stat"><div id="accuracy" class="num">0%</div><div class="muted">Accuracy</div></div><div class="stat"><div id="streak" class="num">0</div><div class="muted">Day streak</div></div><div class="stat"><div id="best" class="num">0</div><div class="muted">Best run</div></div><div class="stat"><div id="sessions" class="num">0</div><div class="muted">Sessions</div></div></div>
+<div class="tip">🎯 <b>Adaptive training:</b> the app raises difficulty when you consistently score well and repeats weak skills when you miss them.</div>
+<h2 style="margin-top:20px">Choose a workout</h2>
+<div class="grid">
+<button class="mode" onclick="startMode('daily')"><b>Daily 10</b><span>20 adaptive drills</span></button>
+<button class="mode" onclick="startMode('position')"><b>Position Memory</b><span>Study legal positions, then reconstruct them</span></button>
+<button class="mode" onclick="startMode('moves')"><b>Move Tracking</b><span>Hold a legal move sequence in memory</span></button>
+<button class="mode" onclick="startMode('blind')"><b>Blindfold Game</b><span>Play a legal game with the board hidden</span></button>
+</div></section>
+
+<section id="game" class="card hidden">
+<div class="row"><span id="skill" class="pill"></span><span id="qnum" class="muted"></span><span id="clock" class="muted" style="margin-left:auto"></span></div>
+<div class="progress"><div id="sessionBar" class="bar"></div></div><div id="prompt"></div><div id="answer"></div>
+</section>
+
+<section id="result" class="card hidden"><h2 id="resultTitle">Session complete</h2><div id="resultBody"></div><button onclick="home()">Back to training</button></section>
+</main>
+
+<script>
+const F="abcdefgh", W={p:"♟",n:"♞",b:"♝",r:"♜",q:"♛",k:"♚"},B={p:"♙",n:"♘",b:"♗",r:"♖",q:"♕",k:"♔"};
+const startBoard=["rnbqkbnr","pppppppp","........","........","........","........","PPPPPPPP","RNBQKBNR"];
+let D=JSON.parse(localStorage.bfcv2||'{"correct":0,"answered":0,"best":0,"sessions":0,"xp":0,"level":1,"streak":0,"last":"","skills":{"square":1,"knight":1,"position":1,"moves":1,"blind":1}}');
+D.history=D.history||[];
+let S={mode:"daily",i:0,total:20,correct:0,streak:0,left:600,interval:null,game:null,seq:[]};
+
+const $=x=>document.getElementById(x); const clone=x=>x.map(r=>r.slice());
+function save(){localStorage.bfcv2=JSON.stringify(D);updateHome()}
+function localDateKey(d=new Date()){let y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0");return `${y}-${m}-${day}`}
+function renderStreakWidget(){if(!$("streakBig"))return;let today=localDateKey(),done=D.history.includes(today);$("streakBig").textContent=D.streak||0;$("todayStatus").textContent=done?"Today: complete":"Today: not done";let out=[];for(let i=6;i>=0;i--){let d=new Date();d.setDate(d.getDate()-i);let k=localDateKey(d),ok=D.history.includes(k);out.push(`<div class="day">${["S","M","T","W","T","F","S"][d.getDay()]}<div class="dot ${ok?"done":""} ${i===0?"today":""}">${ok?"✓":i===0?"•":""}</div></div>`)}$("weekDots").innerHTML=out.join("");let ms=[3,7,10,14,30,50,100,365],next=ms.find(x=>x>(D.streak||0))||365,prev=ms.filter(x=>x<=(D.streak||0)).pop()||0;$("streakProgressBar").style.width=Math.min(100,((D.streak-prev)/(next-prev))*100)+"%";$("streakMilestone").textContent=done?`${next-D.streak} more day${next-D.streak===1?"":"s"} → ${next}-day milestone`:`Complete today's session to keep the streak alive · ${Math.max(0,next-D.streak)} to ${next} days`}
+function updateHome(){let a=D.answered?Math.round(D.correct/D.answered*100):0;$("accuracy").textContent=a+"%";$("streak").textContent=D.streak;$("best").textContent=D.best;$("sessions").textContent=D.sessions;$("levelLabel").textContent="Level "+D.level;$("homeBar").style.width=Math.min(100,D.xp%100)+"%";renderStreakWidget()}!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827"><link rel="manifest" href="manifest.json">
+<title>Blindfold Chess Trainer v2</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--text:#111827;--muted:#6b7280;--accent:#111827;--soft:#eef2ff;--line:#e5e7eb;--good:#dcfce7;--bad:#fee2e2;--gold:#f59e0b}
+@media(prefers-color-scheme:dark){:root{--bg:#0b1020;--card:#151b2e;--text:#f3f4f6;--muted:#9ca3af;--accent:#f3f4f6;--soft:#202946;--line:#293149;--good:#12351f;--bad:#431b20;--gold:#fbbf24}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.app{max-width:760px;margin:auto;padding:18px 15px 45px}
+.top{display:flex;justify-content:space-between;align-items:center}.logo{font-size:32px}.title{font-size:25px;font-weight:850;margin:0}.sub{margin:3px 0 18px;color:var(--muted)}
+.card{background:var(--card);border-radius:20px;padding:18px;margin:12px 0;box-shadow:0 5px 25px #0000000b}.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+button{border:0;border-radius:13px;padding:13px 16px;font-size:16px;font-weight:750;background:var(--accent);color:var(--bg);min-height:48px;cursor:pointer}button.secondary{background:#e5e7eb;color:#111827}@media(prefers-color-scheme:dark){button.secondary{background:#252c42;color:#f3f4f6}}
+button:disabled{opacity:.7}.pill{background:#e5e7eb;color:#374151;padding:6px 10px;border-radius:99px;font-size:13px;font-weight:650}.muted{color:var(--muted)}h2{margin:5px 0 10px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}.stat{background:#f9fafb;border-radius:14px;padding:10px;text-align:center}@media(prefers-color-scheme:dark){.stat{background:#10162a}}.num{font-size:21px;font-weight:850}
+.progress{height:9px;background:#e5e7eb;border-radius:9px;overflow:hidden;margin-top:14px}.bar{height:100%;background:#111827;width:0;transition:.25s}@media(prefers-color-scheme:dark){.bar{background:#f3f4f6}}
+.streakWidget{margin:14px 0 2px;padding:15px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(135deg,var(--soft),transparent);cursor:pointer}.streakHead{display:flex;justify-content:space-between;align-items:center;gap:10px}.streakNumber{font-size:30px;font-weight:900}.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:12px}.day{text-align:center;font-size:11px;color:var(--muted)}.dot{height:31px;width:31px;max-width:100%;margin:4px auto 0;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;background:#e5e7eb;color:#6b7280}.dot.done{background:var(--good);color:#15803d}.dot.today{outline:2px solid var(--gold);outline-offset:2px}.streakProgress{height:8px;background:#e5e7eb;border-radius:8px;overflow:hidden;margin-top:10px}.streakProgress>div{height:100%;background:var(--gold);width:0}.milestone{font-size:13px;color:var(--muted);margin-top:7px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.mode{padding:15px;border:1px solid var(--line);border-radius:15px;background:transparent;color:var(--text);text-align:left}.mode b{display:block;font-size:17px;margin-bottom:4px}.mode span{color:var(--muted);font-size:14px}.big{font-size:48px;font-weight:900;text-align:center;margin:18px 0}.center{text-align:center}.choices{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:18px}.choices button{background:var(--soft);color:var(--text)}.choices button.correct{background:var(--good)}.choices button.wrong{background:var(--bad)}
+.board{width:min(94vw,430px);aspect-ratio:1;margin:17px auto;display:grid;grid-template-columns:repeat(8,1fr);border-radius:12px;overflow:hidden;box-shadow:0 5px 20px #0003}.sq{display:grid;place-items:center;font-size:clamp(24px,8vw,43px)}.light{background:#f0d9b5}.dark{background:#b58863}
+.hidden{display:none}.tip{padding:12px;border-radius:13px;background:var(--soft);margin-top:12px}.moves{font-size:18px;line-height:1.8;background:var(--soft);padding:12px;border-radius:12px;word-break:break-word}.danger{color:#b91c1c}.success{color:#15803d}.level{font-size:15px;color:var(--gold);font-weight:800}.input{width:100%;font-size:18px;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text)}
+</style></head>
+<body><main class="app">
+<div class="top"><div><div class="logo">♟️</div><h1 class="title">Blindfold Chess</h1><p class="sub">Version 2 · Build the board in your head.</p></div><button class="secondary" onclick="resetAll()">Reset</button></div>
+
+<section id="home" class="card">
+<div class="row"><span class="pill">Daily training</span><span class="level" id="levelLabel">Level 1</span></div>
+<div class="progress"><div id="homeBar" class="bar"></div></div>
+<div class="stats"><div class="stat"><div id="accuracy" class="num">0%</div><div class="muted">Accuracy</div></div><div class="stat"><div id="streak" class="num">0</div><div class="muted">Day streak</div></div><div class="stat"><div id="best" class="num">0</div><div class="muted">Best run</div></div><div class="stat"><div id="sessions" class="num">0</div><div class="muted">Sessions</div></div></div>
+<div class="tip">🎯 <b>Adaptive training:</b> the app raises difficulty when you consistently score well and repeats weak skills when you miss them.</div>
+<h2 style="margin-top:20px">Choose a workout</h2>
+<div class="grid">
+<button class="mode" onclick="startMode('daily')"><b>Daily 10</b><span>20 adaptive drills</span></button>
+<button class="mode" onclick="startMode('position')"><b>Position Memory</b><span>Study legal positions, then reconstruct them</span></button>
+<button class="mode" onclick="startMode('moves')"><b>Move Tracking</b><span>Hold a legal move sequence in memory</span></button>
+<button class="mode" onclick="startMode('blind')"><b>Blindfold Game</b><span>Play a legal game with the board hidden</span></button>
+</div></section>
+
+<section id="game" class="card hidden">
+<div class="row"><span id="skill" class="pill"></span><span id="qnum" class="muted"></span><span id="clock" class="muted" style="margin-left:auto"></span></div>
+<div class="progress"><div id="sessionBar" class="bar"></div></div><div id="prompt"></div><div id="answer"></div>
+</section>
+
+<section id="result" class="card hidden"><h2 id="resultTitle">Session complete</h2><div id="resultBody"></div><button onclick="home()">Back to training</button></section>
+</main>
+
+<script>
+const F="abcdefgh", W={p:"♟",n:"♞",b:"♝",r:"♜",q:"♛",k:"♚"},B={p:"♙",n:"♘",b:"♗",r:"♖",q:"♕",k:"♔"};
+const startBoard=["rnbqkbnr","pppppppp","........","........","........","........","PPPPPPPP","RNBQKBNR"];
+let D=JSON.parse(localStorage.bfcv2||'{"correct":0,"answered":0,"best":0,"sessions":0,"xp":0,"level":1,"streak":0,"last":"","skills":{"square":1,"knight":1,"position":1,"moves":1,"blind":1}}');
+D.history=D.history||[];
+let S={mode:"daily",i:0,total:20,correct:0,streak:0,left:600,interval:null,game:null,seq:[]};
+
+const $=x=>document.getElementById(x); const clone=x=>x.map(r=>r.slice());
+function save(){localStorage.bfcv2=JSON.stringify(D);updateHome()}
+function updateHome(){let a=D.answered?Math.round(D.correct/D.answered*100):0;$("accuracy").textContent=a+"%";$("streak").textContent=D.streak;$("best").textContent=D.best;$("sessions").textContent=D.sessions;$("levelLabel").textContent="Level "+D.level;$("homeBar").style.width=Math.min(100,D.xp%100)+"%"}
+function sq(x,y){return F[x]+(y+1)} function xy(s){return [F.indexOf(s[0]),+s[1]-1]}
+function rand(n){return Math.floor(Math.random()*n)} function pick(a){return a[rand(a.length)]}
+function color(s){let [x,y]=xy(s);return (x+y)%2?"Dark":"Light"}
+function boardToMap(b){let m={};for(let y=0;y<8;y++)for(let x=0;x<8;x++)if(b[y][x]!==".")m[sq(x,7-y)]=b[y][x];return m}
+function mapToBoard(m){let b=Array.from({length:8},()=>Array(8).fill("."));for(const s in m){let [x,y]=xy(s);b[7-y][x]=m[s]}return b}
+function inb(x,y){return x>=0&&x<8&&y>=0&&y<8}
+function pseudo(m,from){let p=m[from], out=[], [x,y]=xy(from), type=p.toLowerCase(), white=p===p.toUpperCase();
+const add=(X,Y)=>{if(!inb(X,Y))return false;let t=m[sq(X,Y)];if(!t){out.push(sq(X,Y));return true}if((t===t.toUpperCase())!==white)out.push(sq(X,Y));return false};
+if(type==="n")[[1,2],[1,-2],[-1,2],[-1,-2],[2,1],[2,-1],[-2,1],[-2,-1]].forEach(d=>add(x+d[0],y+d[1]));
+else if(type==="k")[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]].forEach(d=>add(x+d[0],y+d[1]));
+else {let dirs=type==="b"?[[1,1],[1,-1],[-1,1],[-1,-1]]:type==="r"?[[1,0],[-1,0],[0,1],[0,-1]]:[[1,1],[1,-1],[-1,1],[-1,-1],[1,0],[-1,0],[0,1],[0,-1]];dirs.forEach(d=>{let X=x+d[0],Y=y+d[1];while(add(X,Y)){X+=d[0];Y+=d[1]}})}
+if(type==="p"){let dy=white?1:-1;let X=x,Y=y+dy;if(inb(X,Y)&&!m[sq(X,Y)])out.push(sq(X,Y));if((white?y===1:y===6)&&!m[sq(X,Y)]&&!m[sq(X,y+2*dy)])out.push(sq(X,y+2*dy));for(let dx of[-1,1]){X=x+dx;Y=y+dy;if(inb(X,Y)&&m[sq(X,Y)]&&((m[sq(X,Y)]===m[sq(X,Y)].toUpperCase())!==white))out.push(sq(X,Y))}}
+return [...new Set(out)]}
+function apply(m,from,to){let n={...m};let p=n[from];delete n[from];if(n[to])delete n[to];if(p.toLowerCase()==="p"&&(to[1]==="8"||to[1]==="1"))p=p===p.toUpperCase()?"Q":"q";n[to]=p;return n}
+function legalMoves(m,side){let out=[];for(let from in m){let p=m[from],white=p===p.toUpperCase();if((side==="w")!==white)continue;for(let to of pseudo(m,from))out.push({from,to,p})}return out}
+function randomLegalGame(n=20){let m=boardToMap(startBoard),side="w", seq=[];for(let i=0;i<n;i++){let ms=legalMoves(m,side);if(!ms.length)break;let mv=pick(ms),san=sanFor(m,mv,ms);seq.push(san);m=apply(m,mv.from,mv.to);side=side==="w"?"b":"w"}return {m,seq}}
+function sanFor(m,mv,ms){let p=mv.p.toLowerCase(), cap=!!m[mv.to], piece=p==="p"?"":mv.p.toUpperCase();let same=ms.filter(x=>x.to===mv.to&&x.p===mv.p&&x.from!==mv.from);let dis=piece&&same.length?(same.some(x=>x.from[0]===mv.from[0])?mv.from[1]:mv.from[0]):"";return piece+dis+(cap?(p==="p"?mv.from[0]:"")+"x":"")+mv.to}
+function moveBySAN(m,san){let ms=legalMoves(m,s), exact=ms.find(x=>sanFor(m,x,ms)===san);return exact?apply(m,exact.from,exact.to):m}
+function randomPosition(plies){let g=randomLegalGame(plies);return {map:g.m,seq:g.seq}}
+function renderMap(m,show=true){let b=mapToBoard(m);return '<div class="board">'+b.flatMap((r,y)=>r.map((p,x)=>`<div class="sq ${(x+y)%2?'dark':'light'}">${show&&p!=="."?(p===p.toUpperCase()?B:W)[p.toLowerCase()]:""}</div>`)).join("")+'</div>'}
+function setQuestion(skill,content){$("skill").textContent=skill;$("prompt").innerHTML=content;$("answer").innerHTML=""}
+function record(ok,skill){D.answered++;if(ok){D.correct++;S.correct++;S.streak++;D.xp+=10}else S.streak=0;D.best=Math.max(D.best,S.streak);if(skill){D.skills[skill]=Math.min(10,Math.max(1,D.skills[skill]+(ok?1:-1)))}if(D.xp>=D.level*100)D.level++;save();S.i++}
+function opts(vals,correct,skill){$("answer").innerHTML='<div class="choices">'+vals.map(v=>`<button onclick="answer('${String(v).replaceAll("'","&#39;")}','${String(correct).replaceAll("'","&#39;")}','${skill}',this)">${v}</button>`).join("")+'</div>'}
+function answer(v,c,skill,b){let ok=v===c;document.querySelectorAll(".choices button").forEach(x=>x.disabled=true);b.classList.add(ok?"correct":"wrong");if(!ok)[...document.querySelectorAll(".choices button")].find(x=>x.textContent===c)?.classList.add("correct");record(ok,skill);setTimeout(next,650)}
+function startMode(mode){clearInterval(S.interval);S={mode,i:0,total:mode==="blind"?1:mode==="daily"?20:5,correct:0,streak:0,left:mode==="blind"?900:600,interval:setInterval(tick,1000),game:null,seq:[]};$("home").classList.add("hidden");$("result").classList.add("hidden");$("game").classList.remove("hidden");next()}
+function tick(){S.left--;$("clock").textContent=`${Math.floor(S.left/60)}:${String(S.left%60).padStart(2,"0")}`;if(S.left<=0)finish()}
+function next(){if(S.mode==="blind")return blindGame();if(S.i>=S.total)return finish();$("qnum").textContent=`${S.i+1}/${S.total}`;$("sessionBar").style.width=S.i/S.total*100+"%";let pool=S.mode==="daily"?[squareQ,knightQ,positionQ,movesQ]:S.mode==="position"?[positionQ]:S.mode==="moves"?[movesQ]:[squareQ];pick(pool)()}
+function squareQ(){let s=sq(rand(8),rand(8));setQuestion("Square recognition",`<div class="big">${s.toUpperCase()}</div><div class="center">What color is this square?</div>`);opts(["Light","Dark"],color(s),"square")}
+function knightQ(){let s=sq(rand(8),rand(8)),[x,y]=xy(s),c=0;for(let d of[[1,2],[1,-2],[-1,2],[-1,-2],[2,1],[2,-1],[-2,1],[-2,-1]])if(inb(x+d[0],y+d[1]))c++;let vals=[c,Math.max(2,c-1),Math.min(8,c+1),4].filter((v,i,a)=>a.indexOf(v)===i);while(vals.length<4){let z=rand(8)+1;if(!vals.includes(z))vals.push(z)}setQuestion("Knight visualization",`<div class="big">♞ ${s.toUpperCase()}</div><div class="center">How many legal knight destinations does this square have on an otherwise empty board?</div>`);opts(vals,c,"knight")}
+function positionQ(){let pl=4+D.skills.position, g=randomPosition(Math.min(24,pl*2+4)), occ=Object.entries(g.m).filter(([s])=>s!=="e1"&&s!=="e8");let t=pick(occ);setQuestion("Position memory",renderMap(g.m)+`<div class="center">Study this legal position. It disappears in 5 seconds.</div>`);setTimeout(()=>{let vals=[t[0]];while(vals.length<4){let z=sq(rand(8),rand(8));if(!vals.includes(z))vals.push(z)}setQuestion("Position memory",`<div class="big">?</div><div class="center">Where was the <b>${t[1]===t[1].toUpperCase()?"White":"Black"} ${t[1].toLowerCase()}</b>?</div>`);opts(vals,t[0],"position")},5000)}
+function movesQ(){let n=4+D.skills.moves*2,g=randomPosition(n),seq=g.seq;setQuestion("Move tracking",`<div class="center"><p>Memorize this legal move sequence:</p><div class="moves">${seq.join(" ")}</div><p class="muted">The board is never shown. Reconstruct the final position mentally.</p></div>`);setTimeout(()=>{let entries=Object.entries(g.m),t=pick(entries.filter(([s])=>s!=="e1"&&s!=="e8"));let vals=[t[0]];while(vals.length<4){let z=sq(rand(8),rand(8));if(!vals.includes(z))vals.push(z)}setQuestion("Move tracking",`<div class="center"><div class="big">?</div><p>After those moves, where is the <b>${t[1]===t[1].toUpperCase()?"White":"Black"} ${t[1].toLowerCase()}</b>?</p></div>`);opts(vals,t[0],"moves")},Math.max(5000,seq.length*850))}
+function blindGame(){clearInterval(S.interval);$("qnum").textContent="";$("sessionBar").style.width="0";let g=randomPosition(0);S.game={m:g.m,side:"w",moveNo:1,plies:0,max:12+D.level*2,history:[]};renderBlindPrompt()}
+function renderBlindPrompt(){let g=S.game;if(g.plies>=g.max||legalMoves(g.m,g.side).length===0)return blindEnd();let side=g.side==="w"?"White":"Black";setQuestion("Blindfold game",`<div class="center"><div class="big">👁️‍🗨️</div><p><b>${side} to move</b></p><p class="muted">The board is hidden. Enter a legal move such as <b>e4</b> or <b>Nf3</b>. You are training your internal board, not your opening memory.</p></div><input id="blindInput" class="input" autocomplete="off" autocapitalize="characters" placeholder="Enter your move (SAN)"><div class="row" style="margin-top:12px"><button onclick="submitBlind()">Make move</button><button class="secondary" onclick="blindPeek()">Peek (penalty)</button></div><p id="blindMsg" class="muted"></p>`)}
+function submitBlind(){let inp=$("blindInput"),raw=inp.value.trim(),ms=legalMoves(S.game.m,S.game.side),mv=ms.find(x=>sanFor(S.game.m,x,ms).toLowerCase()===raw.toLowerCase());if(!mv){$("blindMsg").innerHTML='<span class="danger">That move is not legal in the current position. Try again.</span>';return}let san=sanFor(S.game.m,mv,ms);S.game.m=apply(S.game.m,mv.from,mv.to);S.game.side=S.game.side==="w"?"b":"w";S.game.plies++;S.game.history.push(san);renderBlindPrompt()}
+function blindPeek(){let old=$("prompt").innerHTML;$("prompt").innerHTML=renderMap(S.game.m)+"<div class='center'><b>Peek used.</b> Look briefly, then continue.</div>";setTimeout(()=>renderBlindPrompt(),2500)}
+function blindEnd(){let n=S.game.plies;D.sessions++;D.xp+=25;save();$("game").classList.add("hidden");$("result").classList.remove("hidden");$("resultTitle").textContent="Blindfold game complete";$("resultBody").innerHTML=`<p>You maintained the position for <b>${n} plies</b>.</p><div class="moves">${S.game.history.join(" ")}</div><p class="muted">Next time, the game becomes longer as your level increases.</p>`}
+function finish(){clearInterval(S.interval);D.sessions++;let today=localDateKey(),prev=new Date();prev.setDate(prev.getDate()-1);let prevKey=localDateKey(prev);if(!D.history.includes(today))D.history.push(today);if(D.last!==today)D.streak=D.last===prevKey?D.streak+1:1;D.last=today;save();$("game").classList.add("hidden");$("result").classList.remove("hidden");$("resultTitle").textContent="Session complete";$("resultBody").innerHTML=`<p>You scored <b>${S.correct}/${S.total}</b> (${Math.round(S.correct/S.total*100)}%).</p><p>Training level: <b>${D.level}</b> · XP: <b>${D.xp}</b></p><p>Current daily streak: <b>${D.streak} day${D.streak===1?"":"s"}</b>.</p>`}
+function home(){$("result").classList.add("hidden");$("home").classList.remove("hidden");updateHome()}
+function resetAll(){if(confirm("Delete all Version 2 progress?")){localStorage.removeItem("bfcv2");location.reload()}}
+updateHome();if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js"));
+</script></body></html>
